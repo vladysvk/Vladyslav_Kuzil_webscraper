@@ -100,3 +100,4 @@ if opinions:
         print("-" * 50)
 else:
     print("No reviews extracted.")
+
