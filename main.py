@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
 
+def main():
+    display_menu()
+
 class Scraper:
     def __init__(self):
         self.product_code = input("Enter product code: ")
@@ -89,15 +92,36 @@ class Scraper:
                 break
         return all_reviews
 
-scraper = Scraper()
-opinions = scraper.get_reviews()  
 
-if opinions:
-    for i, opinion in enumerate(opinions, 1):
-        print(f"Review {i}:")
-        for key, value in opinion.items():
-            print(f"{key}: {value}")
-        print("-" * 50)
-else:
-    print("No reviews extracted.")
+
+def display_menu():
+   
+    while True:
+        print("\nCeneo.pl Scraper - Menu")
+        print("1. Enter product code and scrape reviews")
+        print("2. Exit")
+        choice = input("Select an option: ")
+
+        if choice == "1":
+            scraper = Scraper()
+            opinions = scraper.get_reviews()
+
+            if opinions:
+                print("\nExtracted Reviews:")
+                for i, opinion in enumerate(opinions, 1):
+                    print(f"\nReview {i}:")
+                    for key, value in opinion.items():
+                        print(f"{key}: {value}")
+                    print("-" * 50)
+            else:
+                print("No reviews extracted.")
+        elif choice == "2":
+            print("Exiting program. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
+
 
