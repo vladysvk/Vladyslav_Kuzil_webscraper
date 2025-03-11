@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
+import csv
+import json
 
 def main():
     display_menu()
@@ -91,11 +93,23 @@ class Scraper:
             else:
                 break
         return all_reviews
+    
+    def save_to_json(self, data):
+        filename = f"{self.product_code}_reviews.json"
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=4, ensure_ascii=False)
+        print(f"Data saved to {filename}")
 
+    def save_to_csv(self, data):
+        filename = f"{self.product_code}_reviews.csv"
+        with open(filename, "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
+        print(f"Data saved to {filename}")
 
 
 def display_menu():
-   
     while True:
         print("\nCeneo.pl Scraper - Menu")
         print("1. Enter product code and scrape reviews")
@@ -113,6 +127,30 @@ def display_menu():
                     for key, value in opinion.items():
                         print(f"{key}: {value}")
                     print("-" * 50)
+
+                while True:
+                    print("\nSave options:")
+                    print("1. Save to JSON")
+                    print("2. Save to CSV")
+                    print("3. Save to both")
+                    print("4. Do not save")
+                    save_choice = input("Select an option: ")
+
+                    if save_choice == "1":
+                        scraper.save_to_json(opinions)
+                        break
+                    elif save_choice == "2":
+                        scraper.save_to_csv(opinions)
+                        break
+                    elif save_choice == "3":
+                        scraper.save_to_json(opinions)
+                        scraper.save_to_csv(opinions)
+                        break
+                    elif save_choice == "4":
+                        break
+                    else:
+                        print("Invalid choice. Please try again.")
+
             else:
                 print("No reviews extracted.")
         elif choice == "2":
