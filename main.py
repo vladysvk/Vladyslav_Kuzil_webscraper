@@ -7,7 +7,7 @@ class Scraper:
         self.base_url = f"https://www.ceneo.pl/{self.product_code}/opinie-"
         self.headers = {"User-Agent": "Mozilla/5.0"}
 
-    def fetch_html(self, page_number):
+    def fetch_html(self, page_number=1):
         url = f"{self.base_url}{page_number}"
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -28,7 +28,6 @@ class Scraper:
             recommendation = recommendation.text.strip() if recommendation else "No recommendation"
 
             stars = review.find("span", class_="user-post__score-count").text.strip()
-
             content = review.find("div", class_="user-post__text").text.strip()
 
             pros_section = review.find("div", class_="review-feature__title", string="Zalety")
@@ -60,9 +59,23 @@ class Scraper:
 
         return reviews  
 
-    def get_reviews(self, max_pages=5):
+    def page_count(self):
+        html_text = self.fetch_html()
+        if not html_text:
+            return 1  
+
+        soup = BeautifulSoup(html_text, "lxml")
+        pagination_links = soup.find_all("a", class_="pagination__item")
+        if pagination_links:
+            return len(pagination_links)
+        return 1
+
+    def get_reviews(self):
         all_reviews = []
-        for page_number in range(1, max_pages + 1):
+        total_pages = self.page_count()
+        print(f"Total pages found: {total_pages}")
+
+        for page_number in range(1, total_pages + 1):
             print(f"Fetching reviews from page {page_number}...")
             html = self.fetch_html(page_number)
             if html:
@@ -77,7 +90,7 @@ class Scraper:
         return all_reviews
 
 scraper = Scraper()
-opinions = scraper.get_reviews(max_pages=10)  
+opinions = scraper.get_reviews()  
 
 if opinions:
     for i, opinion in enumerate(opinions, 1):
@@ -87,4 +100,3 @@ if opinions:
         print("-" * 50)
 else:
     print("No reviews extracted.")
-
