@@ -1,7 +1,10 @@
-from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
+import seaborn as sns
+from collections import Counter
 import requests
 import csv
 import json
+from bs4 import BeautifulSoup
 
 def main():
     display_menu()
@@ -108,6 +111,111 @@ class Scraper:
             writer.writerows(data)
         print(f"Data saved to {filename}")
 
+    def average_rating(self, reviews):
+        total_stars = 0
+        valid_reviews = 0
+
+        for review in reviews:
+            stars = review['Stars'].strip()
+        
+            
+            if '/' in stars:
+                try:
+                    numerator = int(stars.split('/')[0].strip())
+                    total_stars += numerator
+                    valid_reviews += 1
+                except ValueError:
+                    continue
+            else:
+                try:
+                    total_stars += float(stars.replace(',', '.'))
+                    valid_reviews += 1
+                except ValueError:
+                    continue
+
+        return total_stars / valid_reviews if valid_reviews else 0
+
+
+    def recommendation_stats(self, reviews):
+        positive = sum([1 for review in reviews if "Polecam" in review["Recommendation"]])
+        negative = len(reviews) - positive
+        return positive, negative
+
+    def vote_stats(self, reviews):
+        helpful_votes = [int(review["Helpful"]) for review in reviews]
+        unhelpful_votes = [int(review["Unhelpful"]) for review in reviews]
+        avg_helpful = sum(helpful_votes) / len(helpful_votes) if helpful_votes else 0
+        avg_unhelpful = sum(unhelpful_votes) / len(unhelpful_votes) if unhelpful_votes else 0
+        return avg_helpful, avg_unhelpful
+
+    def most_common_pros_and_cons(self, reviews):
+        all_pros = [pro for review in reviews for pro in review["Advantages"]]
+        all_cons = [con for review in reviews for con in review["Disadvantages"]]
+        
+        common_pros = Counter(all_pros).most_common(5)  
+        common_cons = Counter(all_cons).most_common(5)  
+        return common_pros, common_cons
+
+    def display_statistics(self, reviews):
+    
+        avg_rating = self.average_rating(reviews)
+        print(f"Average Rating: {avg_rating:.2f} stars")
+
+        positive, negative = self.recommendation_stats(reviews)
+        print(f"Positive Recommendations: {positive}")
+        print(f"Negative Recommendations: {negative}")
+
+  
+        avg_helpful, avg_unhelpful = self.vote_stats(reviews)
+        print(f"Average Helpful Votes: {avg_helpful:.2f}")
+        print(f"Average Unhelpful Votes: {avg_unhelpful:.2f}")
+
+      
+        common_pros, common_cons = self.most_common_pros_and_cons(reviews)
+        print("Most Common Advantages:")
+        for pro, count in common_pros:
+            print(f"- {pro}: {count} mentions")
+        
+        print("Most Common Disadvantages:")
+        for con, count in common_cons:
+            print(f"- {con}: {count} mentions")
+
+        self.plot_statistics(positive, negative, avg_helpful, avg_unhelpful, common_pros, common_cons)
+
+    def plot_statistics(self, positive, negative, avg_helpful, avg_unhelpful, common_pros, common_cons):
+
+        plt.figure(figsize=(8, 6))
+        plt.pie([positive, negative], labels=["Positive", "Negative"], autopct='%1.1f%%', colors=["#4CAF50", "#FF5722"])
+        plt.title("Recommendation Statistics")
+        plt.show()
+
+
+        labels = ["Helpful", "Unhelpful"]
+        values = [avg_helpful, avg_unhelpful]
+        
+        plt.figure(figsize=(8, 6))
+        sns.barplot(x=labels, y=values, palette="Blues_d")
+        plt.title("Average Helpful and Unhelpful Votes")
+        plt.show()
+
+  
+        pros, pros_count = zip(*common_pros) if common_pros else ([], [])
+        cons, cons_count = zip(*common_cons) if common_cons else ([], [])
+
+        plt.figure(figsize=(12, 6))
+        plt.subplot(1, 2, 1)
+        sns.barplot(x=pros, y=pros_count, palette="Greens_d")
+        plt.title("Most Common Advantages")
+        plt.xticks(rotation=45, ha="right")
+
+        plt.subplot(1, 2, 2)
+        sns.barplot(x=cons, y=cons_count, palette="Reds_d")
+        plt.title("Most Common Disadvantages")
+        plt.xticks(rotation=45, ha="right")
+
+        plt.tight_layout()
+        plt.show()
+
 
 def display_menu():
     while True:
@@ -127,6 +235,9 @@ def display_menu():
                     for key, value in opinion.items():
                         print(f"{key}: {value}")
                     print("-" * 50)
+
+        
+                scraper.display_statistics(opinions)
 
                 while True:
                     print("\nSave options:")
@@ -161,5 +272,4 @@ def display_menu():
 
 if __name__ == "__main__":
     main()
-
-
+1
