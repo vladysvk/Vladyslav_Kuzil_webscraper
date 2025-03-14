@@ -118,7 +118,7 @@ class Scraper:
         for review in reviews:
             stars = review['Stars'].strip()
         
-            
+            # If rating is in the form 'X/Y', we extract X (the numerator)
             if '/' in stars:
                 try:
                     numerator = int(stars.split('/')[0].strip())
@@ -152,25 +152,26 @@ class Scraper:
         all_pros = [pro for review in reviews for pro in review["Advantages"]]
         all_cons = [con for review in reviews for con in review["Disadvantages"]]
         
-        common_pros = Counter(all_pros).most_common(5)  
-        common_cons = Counter(all_cons).most_common(5)  
+        common_pros = Counter(all_pros).most_common(5)  # Get top 5 most common pros
+        common_cons = Counter(all_cons).most_common(5)  # Get top 5 most common cons
         return common_pros, common_cons
 
     def display_statistics(self, reviews):
-    
+        # Average Rating
         avg_rating = self.average_rating(reviews)
         print(f"Average Rating: {avg_rating:.2f} stars")
 
+        # Recommendation Stats
         positive, negative = self.recommendation_stats(reviews)
         print(f"Positive Recommendations: {positive}")
         print(f"Negative Recommendations: {negative}")
 
-  
+        # Vote Stats
         avg_helpful, avg_unhelpful = self.vote_stats(reviews)
         print(f"Average Helpful Votes: {avg_helpful:.2f}")
         print(f"Average Unhelpful Votes: {avg_unhelpful:.2f}")
 
-      
+        # Common Pros and Cons
         common_pros, common_cons = self.most_common_pros_and_cons(reviews)
         print("Most Common Advantages:")
         for pro, count in common_pros:
@@ -180,16 +181,17 @@ class Scraper:
         for con, count in common_cons:
             print(f"- {con}: {count} mentions")
 
+        # Displaying the charts
         self.plot_statistics(positive, negative, avg_helpful, avg_unhelpful, common_pros, common_cons)
 
     def plot_statistics(self, positive, negative, avg_helpful, avg_unhelpful, common_pros, common_cons):
-
+        # Plot recommendation stats
         plt.figure(figsize=(8, 6))
         plt.pie([positive, negative], labels=["Positive", "Negative"], autopct='%1.1f%%', colors=["#4CAF50", "#FF5722"])
         plt.title("Recommendation Statistics")
         plt.show()
 
-
+        # Plot vote stats
         labels = ["Helpful", "Unhelpful"]
         values = [avg_helpful, avg_unhelpful]
         
@@ -198,7 +200,7 @@ class Scraper:
         plt.title("Average Helpful and Unhelpful Votes")
         plt.show()
 
-  
+        # Plot common pros and cons
         pros, pros_count = zip(*common_pros) if common_pros else ([], [])
         cons, cons_count = zip(*common_cons) if common_cons else ([], [])
 
@@ -236,7 +238,7 @@ def display_menu():
                         print(f"{key}: {value}")
                     print("-" * 50)
 
-        
+                # Display Statistics and Charts
                 scraper.display_statistics(opinions)
 
                 while True:
