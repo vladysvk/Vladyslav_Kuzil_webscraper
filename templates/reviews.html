@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews for Product {{ product_code }}</title>
+</head>
+<body>
+    <h1>Reviews for Product {{ product_code }}</h1>
+    <ul>
+        {% for review in reviews %}
+            <li>
+                <strong>{{ review.Author }}</strong>: {{ review.Content }}
+                <p>Rating: {{ review.Stars }} | Recommendation: {{ review.Recommendation }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+    <form action="/save" method="POST">
+        <input type="hidden" name="product_code" value="{{ product_code }}">
+        <label for="save_format">Save Format:</label>
+        <select name="save_format">
+            <option value="json">JSON</option>
+            <option value="csv">CSV</option>
+            <option value="both">Both</option>
+        </select>
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

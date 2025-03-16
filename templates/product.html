@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }}</title>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <p>Price: {{ product.price }}</p>
+    <h2>Average Rating: {{ product.average_rating() }} stars</h2>
+    <h3>Reviews:</h3>
+    <ul>
+        {% for opinion in product.opinions %}
+            <li>
+                <p><strong>Opinion ID:</strong> {{ opinion.opinion_id }}</p>
+                <p><strong>Author:</strong> {{ opinion.author }}</p>
+                <p><strong>Recommendation:</strong> {{ opinion.recommendation }}</p>
+                <p><strong>Rating:</strong> {{ opinion.stars }} stars</p>
+                <p><strong>Content:</strong> {{ opinion.content }}</p>
+                <p><strong>Pros:</strong> {{ opinion.pros | join(', ') }}</p>
+                <p><strong>Cons:</strong> {{ opinion.cons | join(', ') }}</p>
+                <p><strong>Helpful Votes:</strong> {{ opinion.helpful_count }}</p>
+                <p><strong>Unhelpful Votes:</strong> {{ opinion.unhelpful_count }}</p>
+                <p><strong>Published on:</strong> {{ opinion.publish_date }}</p>
+                <p><strong>Purchase Date:</strong> {{ opinion.purchase_date }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
